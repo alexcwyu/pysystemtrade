@@ -42,51 +42,57 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-arctic = ["arctic @ git+https://github.com/man-group/arctic.git"]
-dev = ["pytest>=9.0.1", "black>=25.11.0"]
+# arctic extra removed: arctic requires pymongo<4, incompatible with pymongo>=4.15.4
+# arctic = ["arctic @ git+https://github.com/man-group/arctic.git"]
+
+[dependency-groups]
+dev = ["pytest>=9.0.1", "ruff>=0.9.0", "pyright>=1.1.390"]
 
 [project.urls]
 "Homepage" = "https://github.com/robcarver17/pysystemtrade"
 "Bug Tracker" = "https://github.com/robcarver17/pysystemtrade/issues"
+
+[tool.uv]
+default-groups = ["dev"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = [
-    "sysbrokers",
-    "syscontrol",
-    "syscore",
-    "sysdata",
-    "sysexecution",
-    "sysinit",
-    "syslogdiag",
-    "syslogging",
-    "sysobjects",
-    "sysproduction",
-    "sysquant",
-    "systems",
-    "data",
+    "src/sysbrokers",
+    "src/syscontrol",
+    "src/syscore",
+    "src/sysdata",
+    "src/sysexecution",
+    "src/sysinit",
+    "src/syslogdiag",
+    "src/syslogging",
+    "src/sysobjects",
+    "src/sysproduction",
+    "src/sysquant",
+    "src/systems",
+    "src/data",
 ]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"data" = "share/pysystemtrade/data"
+"src/data" = "share/pysystemtrade/data"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "sysbrokers/**",
-    "syscontrol/**",
-    "syscore/**",
-    "sysdata/**",
-    "sysexecution/**",
-    "sysinit/**",
-    "syslogdiag/**",
-    "syslogging/**",
-    "sysobjects/**",
-    "sysproduction/**",
-    "sysquant/**",
-    "systems/**",
-    "data/**",
+    "src/sysbrokers/**",
+    "src/syscontrol/**",
+    "src/syscore/**",
+    "src/sysdata/**",
+    "src/sysexecution/**",
+    "src/sysinit/**",
+    "src/syslogdiag/**",
+    "src/syslogging/**",
+    "src/sysobjects/**",
+    "src/sysproduction/**",
+    "src/sysquant/**",
+    "src/systems/**",
+    "src/data/**",
     "README.md",
     "LICENSE",
 ]
@@ -99,37 +105,56 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
+minversion = "9.0"
+addopts = ["-ra", "-q", "--strict-markers", "--import-mode=importlib", "--doctest-modules", "--ignore=src/systems/provided/moretradingrules/temp.py"]
+testpaths = [
+    # "src/syscore",
+    # "src/syscore/interactive/display",
+    "src/syscore/pandas",
+    "src/syscore/tests",
+    # "src/sysdata",
+    "src/sysdata/config",
+    # "src/sysdata/sim",
+    "src/sysdata/tests",
+    "src/sysinit/futures/tests",
+    # "src/syslogdiag",
+    "src/systems/tests",
+    "src/sysobjects/production",
+    "src/sysobjects/tests",
+    # "src/sysquant/estimators",
+    "src/sysquant/optimisation",
+    # "src/systems",
+    # "src/systems/accounts",
+    # "src/systems/provided",
+    # "src/systems/provided/futures_chapter15",
+    "tests",
+]
+pythonpath = ["src"]
+xfail_strict = true
+filterwarnings = ["error"]
 norecursedirs = "examples"
-addopts = "--doctest-modules --ignore=systems/provided/moretradingrules/temp.py"
 log_cli = "true"
 log_cli_level = 10
 log_format = "%(asctime)s %(levelname)s %(name)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 doctest_optionflags = ["ELLIPSIS", "NUMBER", "NORMALIZE_WHITESPACE"]
-testpaths = [
-    # "syscore",
-    # "syscore/interactive/display",
-    "syscore/pandas",
-    "syscore/tests",
-    # "sysdata",
-    "sysdata/config",
-    # "sysdata/sim",
-    "sysdata/tests",
-    "sysinit/futures/tests",
-    # "syslogdiag",
-    "systems/tests",
-    "sysobjects/production",
-    "sysobjects/tests",
-    # "sysquant/estimators",
-    "sysquant/optimisation",
-    # "systems",
-    # "systems/accounts",
-    # "systems/provided",
-    # "systems/provided/futures_chapter15",
-    "tests",
-]
 
-[tool.black]
+[tool.ruff]
 line-length = 88
-target-version = ["py313"]
-required-version = "25.11.0"
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "C4", "RUF", "PERF", "TC", "PTH"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sysbrokers", "syscontrol", "syscore", "sysdata", "sysexecution", "sysinit", "syslogdiag", "syslogging", "sysobjects", "sysproduction", "sysquant", "systems"]
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "basic"
