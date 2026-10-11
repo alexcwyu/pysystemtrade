@@ -12,15 +12,15 @@ Current recorded status: **complete**. Interpreter fallback evidence and native 
 
 | Step | Exact command | Exit | Elapsed seconds | Evidence |
 |---|---|---:|---:|---|
-| python315-sync | `uv sync --python 3.15 --all-groups --all-extras` | 0 | None | [pysystemtrade-python315-sync.log](../../docs/maintenance-2026-10-12/pysystemtrade-python315-sync.log) |
-| python315-lock | `uv lock --upgrade --python 3.15` | 0 | None | [pysystemtrade-python315-lock.log](../../docs/maintenance-2026-10-12/pysystemtrade-python315-lock.log) |
-| tests | `uv run --no-sync pytest --runslow` | 1 | 106.75 | [pysystemtrade-tests.log](../../docs/maintenance-2026-10-12/pysystemtrade-tests.log) |
-| build | `uv build` | 0 | 85.71 | [pysystemtrade-build.log](../../docs/maintenance-2026-10-12/pysystemtrade-build.log) |
-| tests-numpy-pandas | `uv run --no-sync pytest --runslow` | 1 | 349.57 | [pysystemtrade-tests-numpy-pandas.log](../../docs/maintenance-2026-10-12/pysystemtrade-tests-numpy-pandas.log) |
-| tests-final | `uv run --no-sync pytest --runslow` | 1 | 312.64 | [pysystemtrade-tests-final.log](../../docs/maintenance-2026-10-12/pysystemtrade-tests-final.log) |
-| tests-pandas-sorted | `uv run --no-sync pytest --runslow` | 0 | 278.69 | [pysystemtrade-tests-pandas-sorted.log](../../docs/maintenance-2026-10-12/pysystemtrade-tests-pandas-sorted.log) |
-| build-final | `uv build` | 124 | 120.01 | [pysystemtrade-build-final.log](../../docs/maintenance-2026-10-12/pysystemtrade-build-final.log) |
-| build-verified | `uv build` | 0 | 188.83 | [pysystemtrade-build-verified.log](../../docs/maintenance-2026-10-12/pysystemtrade-build-verified.log) |
+| python315-sync | `uv sync --python 3.15 --all-groups --all-extras` | 0 | None | [check record](maintenance/index.html) |
+| python315-lock | `uv lock --upgrade --python 3.15` | 0 | None | [check record](maintenance/index.html) |
+| tests | `uv run --no-sync pytest --runslow` | 1 | 106.75 | [check record](maintenance/index.html) |
+| build | `uv build` | 0 | 85.71 | [check record](maintenance/index.html) |
+| tests-numpy-pandas | `uv run --no-sync pytest --runslow` | 1 | 349.57 | [check record](maintenance/index.html) |
+| tests-final | `uv run --no-sync pytest --runslow` | 1 | 312.64 | [check record](maintenance/index.html) |
+| tests-pandas-sorted | `uv run --no-sync pytest --runslow` | 0 | 278.69 | [check record](maintenance/index.html) |
+| build-final | `uv build` | 124 | 120.01 | [check record](maintenance/index.html) |
+| build-verified | `uv build` | 0 | 188.83 | [check record](maintenance/index.html) |
 
 ## Test summaries and failures
 

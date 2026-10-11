@@ -1,0 +1,201 @@
+{
+  "repository": "pysystemtrade",
+  "source_commit_before_documentation_commit": "9731d3f6bfdf75317f39d9f35600eab96f93284e",
+  "recorded_on": "2026-10-12",
+  "records": [
+    {
+      "command": [
+        "uv",
+        "build"
+      ],
+      "exit_code": 0,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "build",
+      "original_log": "pysystemtrade-build.log",
+      "log_sha256": "aaa58653efe2144445e60258d113db78b608b8c05be863e3299a0e66a2a68a0e",
+      "outcomes": [
+        "Successfully built dist/pysystemtrade-1.8.3.tar.gz",
+        "Successfully built dist/pysystemtrade-1.8.3-py3-none-any.whl"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "build"
+      ],
+      "exit_code": 124,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "build-final",
+      "original_log": "pysystemtrade-build-final.log",
+      "log_sha256": "3e20f982763562d7056671fc1352346c33dd1d38c854240209dfd9299cab03fa",
+      "outcomes": []
+    },
+    {
+      "command": [
+        "uv",
+        "build"
+      ],
+      "exit_code": 0,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "build-verified",
+      "original_log": "pysystemtrade-build-verified.log",
+      "log_sha256": "aaa58653efe2144445e60258d113db78b608b8c05be863e3299a0e66a2a68a0e",
+      "outcomes": [
+        "Successfully built dist/pysystemtrade-1.8.3.tar.gz",
+        "Successfully built dist/pysystemtrade-1.8.3-py3-none-any.whl"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "lock",
+        "--upgrade",
+        "--python",
+        "3.15"
+      ],
+      "exit_code": 0,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "python315-lock",
+      "original_log": "pysystemtrade-python315-lock.log",
+      "log_sha256": "65ff15edb1c948e8e18604c75cfe61aa911f6abd0e728631dffcbbacace040b3",
+      "outcomes": []
+    },
+    {
+      "command": [
+        "uv",
+        "sync",
+        "--python",
+        "3.15",
+        "--all-groups",
+        "--all-extras"
+      ],
+      "exit_code": 0,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "python315-sync",
+      "original_log": "pysystemtrade-python315-sync.log",
+      "log_sha256": "7dbe1201f5f4a92fc5acd71a3bc1ee86c259bfc2200a89769d1f08b658336ee1",
+      "outcomes": []
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--no-sync",
+        "pytest",
+        "--runslow"
+      ],
+      "exit_code": 1,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "tests",
+      "original_log": "pysystemtrade-tests.log",
+      "log_sha256": "acac14e8c1243ea6a913ee9ebe28ca3f32097c31f484a434585752691bd9ee31",
+      "outcomes": [
+        "======= 23 failed, 90 passed, 30 skipped, 3 xfailed in 105.36s (0:01:45) ======="
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--no-sync",
+        "pytest",
+        "--runslow"
+      ],
+      "exit_code": 1,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "tests-final",
+      "original_log": "pysystemtrade-tests-final.log",
+      "log_sha256": "d1de7270848ce8a03564a4b2e1813112acba2875afb47ed65cb57c425d722434",
+      "outcomes": [
+        "======= 1 failed, 112 passed, 30 skipped, 3 xfailed in 311.52s (0:05:11) ======="
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--no-sync",
+        "pytest",
+        "--runslow"
+      ],
+      "exit_code": 1,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "tests-numpy-pandas",
+      "original_log": "pysystemtrade-tests-numpy-pandas.log",
+      "log_sha256": "2940fc9587b495dd425d90a3b2ddd3159a094d0cfbee0288612fb2bf6b80dada",
+      "outcomes": [
+        "======= 5 failed, 108 passed, 30 skipped, 3 xfailed in 347.86s (0:05:47) ======="
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--no-sync",
+        "pytest",
+        "--runslow"
+      ],
+      "exit_code": 0,
+      "cwd": "<workspace>/pysystemtrade",
+      "check": "tests-pandas-sorted",
+      "original_log": "pysystemtrade-tests-pandas-sorted.log",
+      "log_sha256": "d50405cbbf7717f5788fee1b6d240bd9d286f151be5942deab9d6914becdd53d",
+      "outcomes": [
+        "============ 113 passed, 30 skipped, 3 xfailed in 277.32s (0:04:37) ============"
+      ]
+    }
+  ],
+  "summary": {
+    "repo": "pysystemtrade",
+    "status": "complete",
+    "branch": "feature/ayu_develop",
+    "head": "9731d3f6bfdf75317f39d9f35600eab96f93284e",
+    "selected_python": "3.15.0",
+    "uv_version": "0.13.0",
+    "rust_version": null,
+    "build": {
+      "repo": "pysystemtrade",
+      "step": "build-verified",
+      "command": [
+        "uv",
+        "build"
+      ],
+      "cwd": "<workspace>/pysystemtrade",
+      "started": 1791737339.3032908,
+      "log": "<workspace>/docs/maintenance-2026-10-12/pysystemtrade-build-verified.log",
+      "exit_code": 0,
+      "elapsed_seconds": 188.83
+    },
+    "full_tests": {
+      "repo": "pysystemtrade",
+      "step": "tests-pandas-sorted",
+      "command": [
+        "uv",
+        "run",
+        "--no-sync",
+        "pytest",
+        "--runslow"
+      ],
+      "cwd": "<workspace>/pysystemtrade",
+      "started": 1791736433.3833878,
+      "log": "<workspace>/docs/maintenance-2026-10-12/pysystemtrade-tests-pandas-sorted.log",
+      "exit_code": 0,
+      "elapsed_seconds": 278.69
+    },
+    "summary": "Full existing suite, including --runslow and module doctests:113passed,30pre-existing Windows-only skips,3pre-existing xfails. Pandas3 chronological concatenation, aliases, scalar returns, and serialization metadata were repaired.",
+    "documentation": [
+      "docs/ayu-develop.md",
+      "docs/ayu-develop.html",
+      "docs/development.md",
+      "docs/development.html",
+      "docs/validation.md",
+      "docs/validation.html"
+    ],
+    "source_links": 13,
+    "diagram_count": 6,
+    "sync_evidence": "<workspace>/docs/maintenance-2026-10-12/pysystemtrade-sync.json",
+    "feature_pushed": false,
+    "commit": "9731d3f6bfdf75317f39d9f35600eab96f93284e"
+  },
+  "note": "Full raw logs are retained in the workspace maintenance evidence, not distributed here. Hashes identify those original logs. A successful build or selected test subset does not imply a full test-suite pass. Commands containing <workspace> describe the original execution environment."
+}
