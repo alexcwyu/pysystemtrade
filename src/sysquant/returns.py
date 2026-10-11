@@ -60,7 +60,6 @@ class returnsForOptimisation(pd.DataFrame):
         t = super().__reduce__()
         t[2].update(
             {
-                "_is_copy": self._is_copy,
                 "_frequency": self._frequency,
                 "_pooled_length": self._pooled_length,
             }

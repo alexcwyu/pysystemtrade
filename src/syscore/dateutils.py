@@ -353,7 +353,7 @@ def from_config_frequency_pandas_resample(freq: Frequency) -> str:
         Frequency.BDay: "B",
         Frequency.Week: "W",
         Frequency.Month: "M",
-        Frequency.Hour: "H",
+        Frequency.Hour: "h",
         Frequency.Year: "A",
         Frequency.Day: "D",
         Frequency.Minutes_15: "15T",

@@ -32,7 +32,7 @@ class Test(ut.TestCase):
             )
         )
 
-        return x
+        self.assertIsInstance(x, pd.DataFrame)
 
 
 if __name__ == "__main__":

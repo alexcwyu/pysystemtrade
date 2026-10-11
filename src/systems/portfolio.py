@@ -480,7 +480,7 @@ class Portfolios(SystemStage):
             for instrument_code in instrument_list
         ]
 
-        subsystem_positions = pd.concat(subsystem_positions, axis=1).ffill()
+        subsystem_positions = pd.concat(subsystem_positions, axis=1, sort=True).ffill()
         subsystem_positions.columns = instrument_list
 
         return subsystem_positions

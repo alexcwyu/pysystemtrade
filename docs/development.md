@@ -657,3 +657,31 @@ build_and_write_roll_calendar("INSTRUMENT_CODE")
 - [Architecture](architecture.md) — System design and components
 - [Workflow](workflow.md) — Event flows and processing pipelines
 - [State Management](state-management.md) — State lifecycle and data models
+
+## Maintained uv environment (2026-10-12)
+
+The tested interpreter selection is Python 3.15.0. uv 0.13.0 resolves runtime dependencies, optional extras, development groups, and build isolation. `uv.lock` records exact versions; `--upgrade` refreshes them within the project and compatibility constraints. Review [validation evidence](validation.md) before treating a build or test command as successful on this host.
+
+The complete environment installs on Python 3.15.0. Current NumPy and Pandas scalar, calendar alias, serialization, and chronological concatenation behavior is exercised by the existing tests.
+
+### Layout and build ownership
+
+The multi-package src/ layout remains intact. New upstream sysquant and broker tests were moved into their corresponding src packages. Hatchling includes the sys* packages, systems, and data assets.
+
+Apple Command Line Tools and compiler headers are required when a dependency or extension builds from source.
+
+### Commands from the repository root
+
+```sh
+uv python install 3.15.0
+uv lock --upgrade --python 3.15.0
+uv sync --all-groups --all-extras --python 3.15.0
+uv build
+uv run --no-sync pytest --runslow
+```
+
+### External inputs and test scope
+
+MongoDB, Interactive Brokers, private configuration, and production state are external requirements. The maintained broker package is ib_async. Pandas subclasses must preserve custom frequency and pooling metadata during multiprocessing and serialization. Calendar-frequency aliases and scalar-return conventions also affect doctest and research compatibility.
+
+Existing upstream skips and xfails remain unchanged. Full suite failures, incomplete runs, and supplemental scoped checks are listed separately in validation. No new test cases were added. The architecture document links existing implementation files and explains the component contracts.

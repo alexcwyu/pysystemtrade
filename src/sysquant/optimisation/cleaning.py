@@ -134,6 +134,6 @@ def clean_list_of_weights(
 
     # This process will screw up weights - let's fix them
     xsum = sum(weights)
-    weights = [x / xsum for x in weights]
+    weights = [float(x / xsum) for x in weights]
 
     return weights

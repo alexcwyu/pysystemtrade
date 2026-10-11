@@ -86,7 +86,7 @@ def get_intraday_pdf_at_frequency(
     intraday_only_df = intraday_date_rows_in_pd_object(
         pd_object, closing_time=closing_time
     )
-    intraday_df = intraday_only_df.resample(frequency).last()
+    intraday_df = intraday_only_df.resample(frequency.replace("H", "h")).last()
     intraday_df_clean = intraday_df.dropna()
 
     return intraday_df_clean
@@ -233,7 +233,7 @@ def reindex_last_monthly_include_first_date(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
 
-    df_monthly_index = list(df.resample("1M").last().index)  ## last day in month
+    df_monthly_index = list(df.resample("1ME").last().index)  ## last day in month
     df_first_date_in_index = df.index[0]
     df_monthly_index = [df_first_date_in_index] + df_monthly_index
     df_reindex = df.reindex(df_monthly_index).ffill()
