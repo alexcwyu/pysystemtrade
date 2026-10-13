@@ -1,164 +1,191 @@
-# PySystemTrade: workflow and architecture
+# pysystemtrade: workflow, design and architecture
 
-Updated 2026-10-12. Source baseline: `8fec4f3530fa09a1c29bf06ca64a1dd0b53fde43` on `feature/ayu_develop`. See [development commands](development.md) and [validation evidence](validation.md) for the tested environment and current limitations.
+Updated: **2026-10-13**
+Reviewed Git hash: `cf3fa1828679dd8dff4779d30beba3c1c8a7cd63`
+Branch: `feature/ayu_develop`
+Source diff SHA256: `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
+Scope: **Systematic futures framework** / Maintenance: **active**
+Languages: Python
 
-## Purpose and features
+[HTML edition](ayu-develop.html) / [Development](development.md) / [Historical validation](validation.md) / [Full system comparison](../../docs/index.html)
 
-Builds systematic futures portfolios and operates a production pipeline covering data updates, forecasts, risk sizing, target positions, and Interactive Brokers execution.
+## Purpose and scope
 
-- Lazy staged backtesting systems
-- Forecast scaling, combination, sizing, and portfolio stages
-- Futures contracts, rolls, prices, and fills
-- CSV, MongoDB, and Parquet data abstractions
-- Production process control and broker order stacks
+Compose lazy backtesting stages and operate separate production data and broker order pipelines.
 
-## Component architecture
+## Features and support boundaries
 
-System composes stages and evaluates their cached outputs lazily. Config layers defaults and user overrides, while dataBlob resolves backend-specific classes into canonical data attributes. Domain objects represent contracts, rolls, fills, and prices. Production is deliberately staged: daily price updates precede adjusted prices and system target generation, while stack handling and monitoring run during trading hours. Quantitative estimation and optimisation remain separate from broker transport.
+Native = implemented here. Integration = supplied through a named host/API. Limited = material restriction. Not provided = evidenced scope exclusion. Unverified = support/absence not established. Not applicable = outside this artifact type.
+
+| Capability | Status | Implementation and limits | Source |
+|---|---|---|---|
+| Backtesting | Native | Stage-composed systematic simulation context with cache and data source. | [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) / [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622)) |
+| Live execution | Integration | IB execution stack delegates futures contract orders to broker client. No live broker was contacted. | [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334)) |
+| Paper trading | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Event driven | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Vectorized | Native | Historical position series are scaled and forward-filled using pandas. | [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622)) |
+| Order management | Integration | Broker execution stack returns placed order objects or missing_order to callers. | [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334)) |
+| Order types | Limited | Order type and limit price are passed through to IB. Exact support requires the broker client/order definitions. | [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334)) |
+| Multi venue | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Crypto | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Equities | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Futures | Native | IB order submission resolves futures contract and contract data. | [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334)) |
+| Options | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Forex | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Strategy api | Native | Named user-supplied stages initialized with shared system context. | [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) |
+| Optimization | Native | Portfolio retrieves estimated instrument weights from configured optimizer. | [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622)) |
+| Machine learning | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Reinforcement learning | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Portfolio | Native | Instrument portfolio weights and notional position series. | [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622)) |
+| Risk management | Native | Optional risk scalar overlays notional portfolio positions. | [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622)) |
+| Performance analytics | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Historical data | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Streaming data | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Persistence | Integration | dataBlob instantiates MongoDB and Parquet adapter classes. | [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) / [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171)) |
+| Data pipeline | Native | Named stage installation plus adapter resolution. | [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) / [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) / [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171)) |
+| Web ui | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Cli | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Monitoring | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Extension api | Native | Supplied stages and storage/broker adapter classes. | [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) / [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) / [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171)) |
+| Native acceleration | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Distributed execution | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+
+## System components
+
+| Component | Responsibility | Source |
+|---|---|---|
+| System | Stage composition and lazy cached system context. | [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) |
+| Portfolios | Instrument weights, diversification and position risk scaling. | [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622)) |
+| dataBlob | Production storage and broker adapter dependency resolution. | [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) / [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171)) |
+| ibExecutionStackData | Interactive Brokers order integration. | [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334)) |
+
+## Architecture and component boundaries
+
+The component view summarizes inspected responsibility boundaries. Arrows identify the documented API/data dependencies; this is not a deployment-readiness claim.
 
 ```mermaid
 flowchart LR
-    C0["DataBlob and backend data"]
-    C1["Config and System stages"]
-    C2["Forecasts and portfolio positions"]
-    C3["Production order generation"]
-    C4["Broker execution and fills"]
-    C0 --> C1 --> C2 --> C3 --> C4
+  N0["System"]
+  N1["Portfolios"]
+  N2["dataBlob"]
+  N3["ibExecutionStackData"]
+  N0 -->|"Install a supplied Portfolios stage through stage.system_init. The choice is user configuration."| N1
 ```
 
-The diagram shows responsibility boundaries in the main research or execution path. Concrete entry points and implementation files are linked below.
+- Install a supplied Portfolios stage through stage.system_init. The choice is user configuration.: [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85))
 
-## Core types
+## Design decisions
 
-The types below belong to the public or native boundary described by the linked implementation. Arrows describe the dependency or ownership relationship used in the documented workflow. Listed Python methods are present in the linked source; native array types represent the binding boundary.
+| Decision | Rationale | Tradeoff | Evidence |
+|---|---|---|---|
+| Initialize stages once and calculate stage outputs lazily. | Shared System context and cache connect forecasting and portfolio computations. | The backtest stage flow and production broker stack are separate entry points. | [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) |
+| Resolve storage classes through dataBlob naming and shared handles. | Production adapters receive consistent database/access/log objects. | Adapter constructors must follow expected naming and argument conventions. | [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) / [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171)) |
+
+## Class and interface relationships
 
 ```mermaid
 classDiagram
-    class System {
-        +log()
-        +data()
-        +config()
-    }
-    class SystemStage {
-        +name()
-        +methods()
-        +system_init()
-    }
-    class Config {
-        +elements()
-        +add_elements()
-        +remove_element()
-    }
-    class dataBlob {
-        +add_class_list()
-        +add_class_object()
-        +csv_data_paths()
-    }
-    class returnsForOptimisation {
-        +frequency()
-        +pooled_length()
-    }
-    System *-- SystemStage : owns named stages
-    System *-- Config : resolves parameters
-    System --> returnsForOptimisation : prepares estimation inputs
-    dataBlob --> Config : production data settings
+  class N0["System"] {
+    <<class>>
+    +__init__()
+    +_setup_stages()
+  }
+  class N1["Portfolios"] {
+    <<class>>
+    +get_notional_position()
+    +get_raw_estimated_instrument_weights()
+  }
+  class N2["dataBlob"] {
+    <<class>>
+    +_add_mongo_class()
+    +_add_parquet_class()
+  }
+  class N3["ibExecutionStackData"] {
+    <<class>>
+    +_send_broker_order_to_IB()
+  }
+  N0 *-- N1 : System retains each supplied named stage. Portfolios can be installed as a stage.
 ```
 
-## End-to-end workflow
+Each node is a reviewed source symbol. Function/module nodes are explicitly labeled; they do not imply Python classes. Only reviewed relationships are drawn.
 
-1. Load defaults, private overrides, and system configuration.
-2. Update and align futures prices and contract data.
-3. Evaluate lazy forecast and position stages.
-4. Compare target positions with production holdings.
-5. Generate and execute broker orders and retain fills.
+- **System** (class): [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85))
+- **Portfolios** (class): [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622))
+- **dataBlob** (class): [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) / [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171))
+- **ibExecutionStackData** (class): [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334))
+
+## Workflow
+
+### Representative source-backed flow
+
+The steps describe the inspected implementation. User configuration and data inputs are external prerequisites.
 
 ```mermaid
 flowchart TD
-    W0["Load defaults, private overrides, and system configuration"]
-    W1["Update and align futures prices and contract data"]
-    W2["Evaluate lazy forecast and position stages"]
-    W3["Compare target positions with production holdings"]
-    W4["Generate and execute broker orders and retain fills"]
-    W0 --> W1 --> W2 --> W3 --> W4
-    W4 --> R{"Review evidence"}
-    R -->|Revise configuration| W0
-    R -->|Retain result| A["Store reproducible artifacts"]
+  W0["Initialize config, simulation data and supplied stages."]
+  W1["Lazily calculate instrument weights and notional positions when requested."]
+  W0 --> W1
+  W2["Apply the optional risk scalar to the position series."]
+  W1 --> W2
 ```
 
-## Interaction sequence
+1. Initialize config, simulation data and supplied stages.. [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85))
+2. Lazily calculate instrument weights and notional positions when requested.. [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622))
+3. Apply the optional risk scalar to the position series.. [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) / [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622))
 
-The sequence follows one unit of work. Results return across the same boundaries that accepted the configuration and data. External I/O and numerical execution have different failure modes and should retain separate evidence.
+## Sequence
+
+Representative calls and data dependencies
+
+Messages represent inspected calls or explicitly labelled data dependencies. A data dependency is not an asserted direct runtime call.
 
 ```mermaid
 sequenceDiagram
-    actor User as Researcher or operator
-    participant C0 as DataBlob and backend data
-    participant C1 as Config and System stages
-    participant C2 as Forecasts and portfolio positions
-    participant C3 as Production order generation
-    participant C4 as Broker execution and fills
-    User->>C0: Supply configuration and inputs
-    C0->>C1: Update and align futures prices and contract data
-    C1->>C2: Evaluate lazy forecast and position stages
-    C2->>C3: Compare target positions with production holdings
-    C3->>C4: Generate and execute broker orders and retain fills
-    C4-->>C3: Results and retained state
-    C3-->>C2: Execution or evaluation evidence
-    C2-->>C1: Computed outputs
-    C1-->>C0: Research or runtime result
-    C0-->>User: Inspect outputs and provenance
+  participant N0 as System
+  participant N1 as Portfolios
+  participant N2 as dataBlob
+  participant N3 as ibExecutionStackData
+  N0->>N1: Install a supplied Portfolios stage through stage.system_init. The choice is user configuration.
 ```
 
-## Data and artifact lifecycle
+- Install a supplied Portfolios stage through stage.system_init. The choice is user configuration.: [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85))
 
-```mermaid
-flowchart LR
-    Inputs["Configuration and source data"] --> Runtime["Validated runtime inputs"]
-    Runtime --> Work["Forecasts and portfolio positions"]
-    Work --> Outputs["Broker execution and fills"]
-    Outputs --> Review["Metrics, logs, and retained artifacts"]
-    Review --> Inputs
-```
+## Strengths and limits
 
-Inputs include explicit strategy or model settings, data selection, and execution assumptions. Retaining these with outputs makes a rerun reviewable. Temporary environments and caches remain development artifacts, while source-controlled configuration documents intended behavior.
+### Strengths
 
-## Execution and failure boundaries
+- Simulation stages and production futures order objects have explicit boundaries. [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) / [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) / [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334))
 
-MongoDB, Interactive Brokers, private configuration, and production state are external requirements. The maintained broker package is ib_async. Pandas subclasses must preserve custom frequency and pooling metadata during multiprocessing and serialization. Calendar-frequency aliases and scalar-return conventions also affect doctest and research compatibility.
+### Limitations
 
-```mermaid
-stateDiagram-v2
-    [*] --> Configured
-    Configured --> Prepared: Inputs and dependencies available
-    Prepared --> Running: Start unit of work
-    Running --> Completed: Retain result
-    Running --> Failed: Record exception and inputs
-    Failed --> Configured: Correct configuration or implementation
-    Completed --> [*]
-```
+- IB integration requires a configured broker connection and correctly resolved contract data. [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334))
+- Static inspection of dataBlob is not validation of MongoDB/Parquet installations or persistent data correctness. [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) / [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171))
 
-This state diagram describes the documented workflow, not a claim that these names are an implementation enum. Failure evidence should identify whether input preparation, external services, native compilation, or application execution failed.
+## Validation scope
 
-## Development layout
+The linked validation and command records preserve actual historical runs and user-authorized exclusions. This source/document review does not rerun application tests, establish live trading readiness or rank benchmark performance. Current data, credential and runtime prerequisites remain material.
 
-The multi-package src/ layout remains intact. New upstream sysquant and broker tests were moved into their corresponding src packages. Hatchling includes the sys* packages, systems, and data assets.
+[Repository validation](validation.md) / [Executed checks](maintenance/index.md)
 
 ## Source map
 
-| Existing source | Responsibility evidence |
-|---|---|
-| [src/systems/basesystem.py](../src/systems/basesystem.py#L25) | Implementation and module/type documentation, beginning at line 25 |
-| [src/systems/stage.py](../src/systems/stage.py#L6) | Implementation and module/type documentation, beginning at line 6 |
-| [src/sysdata/config/configdata.py](../src/sysdata/config/configdata.py#L37) | Implementation and module/type documentation, beginning at line 37 |
-| [src/sysdata/data_blob.py](../src/sysdata/data_blob.py#L14) | Implementation and module/type documentation, beginning at line 14 |
-| [src/systems/forecast_scale_cap.py](../src/systems/forecast_scale_cap.py#L16) | Implementation and module/type documentation, beginning at line 16 |
-| [src/systems/forecast_combine.py](../src/systems/forecast_combine.py#L45) | Implementation and module/type documentation, beginning at line 45 |
-| [src/systems/positionsizing.py](../src/systems/positionsizing.py#L20) | Implementation and module/type documentation, beginning at line 20 |
-| [src/systems/portfolio.py](../src/systems/portfolio.py#L69) | Implementation and module/type documentation, beginning at line 69 |
-| [src/sysquant/returns.py](../src/sysquant/returns.py#L14) | Implementation and module/type documentation, beginning at line 14 |
-| [src/sysquant/optimisation/optimise_over_time.py](../src/sysquant/optimisation/optimise_over_time.py#L14) | Implementation and module/type documentation, beginning at line 14 |
-| [src/sysbrokers/IB/ib_orders.py](../src/sysbrokers/IB/ib_orders.py#L34) | Implementation and module/type documentation, beginning at line 34 |
-| [src/sysobjects/contracts.py](../src/sysobjects/contracts.py#L22) | Implementation and module/type documentation, beginning at line 22 |
-| [src/syscore/pandas/frequency.py](../src/syscore/pandas/frequency.py#L21) | Implementation and module/type documentation, beginning at line 21 |
+| Reviewed symbol/path | Inspected responsibility | Actual file SHA256 |
+|---|---|---|
+| [System.__init__](../src/systems/basesystem.py) ([L42](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L42)) | Initializes data/config, installs supplied stages and creates a systemCache. | `3f2443690231f0ab4163775a7ede9742a29063d45c98bbc5bf80dfadec3d5d8a` |
+| [System._setup_stages](../src/systems/basesystem.py) ([L85](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/basesystem.py#L85)) | Calls each stage.system_init, rejects duplicate names and exposes stage instances as named system attributes. | `3f2443690231f0ab4163775a7ede9742a29063d45c98bbc5bf80dfadec3d5d8a` |
+| [Portfolios.get_notional_position](../src/systems/portfolio.py) ([L178](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L178)) | Gets the pre-risk notional position and applies a forward-filled risk scalar when configured. | `1c2d470f8479f4e98cdeae962ab830cd960df77ca5337586fa35e96d1fb015bc` |
+| [Portfolios.get_raw_estimated_instrument_weights](../src/systems/portfolio.py) ([L622](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/systems/portfolio.py#L622)) | Obtains optimizer weights and restores configured zero weights. | `1c2d470f8479f4e98cdeae962ab830cd960df77ca5337586fa35e96d1fb015bc` |
+| [dataBlob._add_mongo_class](../src/sysdata/data_blob.py) ([L139](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L139)) | Instantiates a data adapter with shared Mongo connection and logger. | `5212571cb5d669140d1ffd48e425af6d4af8734405288581ac2b5a7adefc54c5` |
+| [dataBlob._add_parquet_class](../src/sysdata/data_blob.py) ([L171](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysdata/data_blob.py#L171)) | Instantiates a data adapter with shared Parquet access and logger. | `5212571cb5d669140d1ffd48e425af6d4af8734405288581ac2b5a7adefc54c5` |
+| [ibExecutionStackData._send_broker_order_to_IB](../src/sysbrokers/IB/ib_orders.py) ([L334](https://github.com/alexcwyu/pysystemtrade/blob/cf3fa1828679dd8dff4779d30beba3c1c8a7cd63/src/sysbrokers/IB/ib_orders.py#L334)) | Resolves a futures contract with IB data and calls broker_submit_order with trade list, account, order type and limit price. | `5d33ae9f8dbb566490f82b033c60a8b719768b16a4936e3a48769283796bc0df` |
 
-The links target files present in this checkout. Follow their imports and adjacent tests when changing a boundary. The validation document distinguishes successful builds, complete test runs, inherited skips, and unresolved prerequisites.
+## Documentation provenance
+
+Review date: 2026-10-13. Full committed source HEAD: `cf3fa1828679dd8dff4779d30beba3c1c8a7cd63`. Template version: 2. 4 source files were independently hashed for this guide.
+
+[Evidence catalog](../../docs/systems-2026-10-13/catalog.json) / [Standard template](../../docs/guidelines/APP_TEMPLATE.md)
+
+- Snapshot provenance: inventory.json full HEAD cf3fa1828679dd8dff4779d30beba3c1c8a7cd63, branch feature/ayu_develop. Source was inspected in the existing checkout and no repository files were changed.
+- Inspected implementation bodies and existing architecture documentation. This is a representative static source audit, not a runtime or live-service validation. Credential exclusions in current validation are policy, not evidence that a live connection succeeds.
+- Inspected source files: src/systems/basesystem.py, src/systems/portfolio.py, src/sysdata/data_blob.py, src/sysbrokers/IB/ib_orders.py
+- Read pysystemtrade/AGENTS.md, including prohibitions on AI PR management/review. This task creates evidence outside the repository, with no PR operations.

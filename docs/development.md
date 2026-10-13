@@ -1,5 +1,11 @@
 # Development Guide
 
+<!-- current-documentation-provenance -->
+Documentation reviewed: 2026-10-13 · Git source base: `cf3fa1828679dd8dff4779d30beba3c1c8a7cd63` · [Current architecture and feature guide](ayu-develop.md).
+Historical execution commands/results below retain their original dates and scope; this metadata update is not a new application test run.
+<!-- /current-documentation-provenance -->
+
+
 ## Development Setup
 
 ### Prerequisites
